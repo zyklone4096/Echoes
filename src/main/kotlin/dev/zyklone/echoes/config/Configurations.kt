@@ -10,6 +10,7 @@ internal data class Configurations(
     // contents
     val builtinAttributes: BuiltinAttributes = BuiltinAttributes(),
     val items: Items = Items(),
+    val gameplay: GamePlay = GamePlay(),
 )
 
 @Serializable
@@ -42,3 +43,12 @@ internal data class BuiltinAttributes(
 internal data class Items(
     val defaultEchoItem: Item = Item.Vanilla(Material.IRON_GOLEM_SPAWN_EGG),
 )
+
+@Serializable
+internal data class GamePlay(
+    val dataBankLevelIncrement: Int = 100,
+) {
+    init {
+        require(dataBankLevelIncrement > 0) { "Data bank level experience increment must be positive" }
+    }
+}

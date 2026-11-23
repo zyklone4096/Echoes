@@ -4,6 +4,7 @@ import dev.zyklone.echoes.Echoes
 import dev.zyklone.echoes.database.DataBankModel
 import dev.zyklone.echoes.database.DataBankTable
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import org.bukkit.entity.Player
 import java.util.UUID
@@ -40,14 +41,22 @@ object PlayerManager {
 
     fun loadAsync(player: Player): CompletableFuture<PlayerDataAccess> {
         val uniqueId = player.uniqueId
-        this.loading[uniqueId]?.let { return it }
+        this.access[uniqueId]?.let { return CompletableFuture.completedFuture(it) }
 
         val future = CompletableFuture<PlayerDataAccess>()
-        loading[uniqueId] = future
+        loading.putIfAbsent(uniqueId, future)?.let { return it }
         CoroutineScope(Echoes.INST.coroutines).launch {
-            loading.remove(uniqueId)
-            future.complete(load(player))
+            try {
+                future.complete(access[uniqueId] ?: load(player))
+            } catch (e: Throwable) {
+                future.completeExceptionally(e)
+                if (e is CancellationException) throw e
+            } finally {
+                loading.remove(uniqueId, future)
+            }
         }
         return future
     }
+
+    operator fun get(player: Player) = this.access[player.uniqueId]
 }

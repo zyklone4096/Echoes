@@ -31,6 +31,10 @@ dependencies {
 
     include(libs.cloud.paper)
     include(libs.cloud.kotlin.coroutines)
+
+    testImplementation(kotlin("test"))
+    testImplementation(libs.paper.api)
+    testImplementation("org.xerial:sqlite-jdbc:3.50.3.0")
 }
 
 paperPluginYaml {

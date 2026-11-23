@@ -4,12 +4,19 @@ import dev.zyklone.echoes.Echoes
 import dev.zyklone.echoes.contents.attributes.EchoAttributes
 import dev.zyklone.echoes.contents.echoes.Echo
 import dev.zyklone.echoes.contents.echoes.EchoRegistry
+import dev.zyklone.echoes.contents.player.PlayerManager
 import dev.zyklone.echoes.contents.sonata.Sonata
 import dev.zyklone.echoes.contents.sonata.SonataRegistry
+import dev.zyklone.echoes.database.DataBankModel
 import dev.zyklone.echoes.utils.literal
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.future.await
+import kotlinx.coroutines.launch
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
-import org.incendo.cloud.Command
+import org.incendo.cloud.bukkit.data.SinglePlayerSelector
+import org.incendo.cloud.bukkit.parser.selector.SinglePlayerSelectorParser
 import org.incendo.cloud.paper.util.sender.PlayerSource
 import org.incendo.cloud.paper.util.sender.Source
 import org.incendo.cloud.parser.standard.IntegerParser
@@ -22,6 +29,7 @@ object AdminCommand {
 
         mgr.command(status(root))
         mgr.command(give(mgr, root))
+        dataBank(mgr, root)
     }
 
     private fun status(root: CommandBuilder) = root.literal("status")
@@ -57,7 +65,7 @@ object AdminCommand {
             val sonata = it.optional<Sonata>("sonata").getOrNull()
             val rarity = it.optional<Int>("rarity").getOrNull()?.toByte()
 
-            val data = echo.createRandom(player, sonata = sonata)
+            val data = echo.createRandom(player, sonata = sonata, rarity = rarity)
             val created = echo.asItem(data)
             player.scheduler.run(Echoes.INST, {
                 if (player.inventory.firstEmpty() < 0)
@@ -72,5 +80,41 @@ object AdminCommand {
                     .append("已添加 ".literal())
                     .append(echo.displayName(data.rarity)))
             }, null)
+        }
+
+    private fun dataBank(mgr: CommandManager, root: CommandBuilder) {
+        val parent = root.literal("databank")
+            .argument(SinglePlayerSelectorParser.singlePlayerSelectorComponent<Source>()
+                .name("target"))
+        mgr.command(dataBankAddLevel(parent))
+    }
+
+    private fun dataBankAddLevel(root: CommandBuilder) = root
+        .literal("add-level")
+        .required("value", IntegerParser.integerParser(1))
+        .handler {
+            val sender = it.sender().source()
+            val player = it.get<SinglePlayerSelector>("target").single()
+            val value = it.get<Int>("value")
+            CoroutineScope(Echoes.INST.coroutines).launch {
+                try {
+                    val target = PlayerManager[player] ?: PlayerManager.loadAsync(player).await()
+                    val updated = target.addDataBankLevel(value)
+                    sender.sendMessage(Component.text()
+                        .append(MESSAGE_HEADER)
+                        .append("${player.name} 的数据坞等级已更新为 ".literal())
+                        .append(Component.text(updated.level, NamedTextColor.GREEN))
+                        .append(" 级（上限 ${DataBankModel.MAX_LEVEL} 级）".literal())
+                        .build())
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Echoes.INST.slF4JLogger.error("Failed to add data bank levels for ${player.uniqueId}", e)
+                    sender.sendMessage(Component.text()
+                        .append(MESSAGE_HEADER)
+                        .append("数据坞等级更新失败，请查看服务器日志".literal(NamedTextColor.RED))
+                        .build())
+                }
+            }
         }
 }
