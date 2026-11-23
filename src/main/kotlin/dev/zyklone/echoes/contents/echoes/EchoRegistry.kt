@@ -1,6 +1,10 @@
 package dev.zyklone.echoes.contents.echoes
 
+import dev.zyklone.echoes.contents.echoes.builtin.EnderDragon
+import dev.zyklone.echoes.contents.echoes.builtin.Enderman
+import dev.zyklone.echoes.contents.echoes.builtin.IronGolem
 import dev.zyklone.echoes.contents.echoes.builtin.Skeleton
+import dev.zyklone.echoes.contents.echoes.builtin.SnowGolem
 import dev.zyklone.echoes.contents.echoes.builtin.Wither
 import dev.zyklone.echoes.contents.echoes.builtin.Zombie
 import org.bukkit.NamespacedKey
@@ -16,7 +20,11 @@ object EchoRegistry {
     private val registry = HashMap<NamespacedKey, Echo>()
 
     fun init() {
+        this.add(EnderDragon())
+        this.add(Enderman())
+        this.add(IronGolem())
         this.add(Skeleton())
+        this.add(SnowGolem())
         this.add(Wither())
         this.add(Zombie())
     }

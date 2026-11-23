@@ -115,10 +115,10 @@ data class DataBankModel(
 
     val maxRarity: Byte
         get() = when {
-            this.level >= 15 -> 5
-            this.level >= 8 -> 4
-            this.level >= 3 -> 3
-            else -> 2
+            this.level >= 15 -> 4
+            this.level >= 8 -> 3
+            this.level >= 3 -> 2
+            else -> 1
         }
 
     val maxCost: Int
