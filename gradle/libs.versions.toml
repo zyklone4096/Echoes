@@ -1,0 +1,32 @@
+[versions]
+kotlin = "2.4.21"
+
+paper-api = "26.3.build.+"
+minecraft = "26.3"
+
+shadow = "9.6.1"
+run-task = "3.1.0"
+resource-factory = "1.4.0"
+
+exposed = "1.6.1"
+hikari = "7.1.0"
+
+[libraries]
+paper-api = { module = "io.papermc.paper:paper-api", version.ref = "paper-api" }
+kotlin-stdlib = { module = "org.jetbrains.kotlin:kotlin-stdlib-jdk8", version.ref = "kotlin" }
+kotlinx-serialization-hocon = { module="org.jetbrains.kotlinx:kotlinx-serialization-hocon", version = "1.13.0" }
+
+exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref="exposed" }
+exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref="exposed" }
+exposed-migration = { module = "org.jetbrains.exposed:exposed-migration-jdbc", version.ref="exposed" }
+exposed-dao = { module = "org.jetbrains.exposed:exposed-dao", version.ref="exposed" }
+hikari = { module = "com.zaxxer:HikariCP", version.ref="hikari" }
+
+cloud-paper = { module = "org.incendo:cloud-paper", version = "2.0.1" }
+cloud-kotlin-coroutines = { module = "org.incendo:cloud-kotlin-coroutines", version = "2.1.0" }
+
+[plugins]
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
+run-paper = { id = "xyz.jpenilla.run-paper", version.ref = "run-task" }
+resource-factory-paper = { id = "xyz.jpenilla.resource-factory-paper-convention", version.ref = "resource-factory" }
+kotlinx-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref="kotlin" }
