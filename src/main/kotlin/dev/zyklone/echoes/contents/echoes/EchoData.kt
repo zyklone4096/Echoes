@@ -4,7 +4,6 @@ import dev.zyklone.echoes.Echoes
 import dev.zyklone.echoes.contents.attributes.EchoAttributes
 import io.papermc.paper.persistence.PersistentDataContainerView
 import org.bukkit.NamespacedKey
-import org.bukkit.entity.Player
 import org.bukkit.persistence.PersistentDataAdapterContext
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataType
@@ -60,6 +59,10 @@ class EchoData(
     /** 可调谐槽位数量由强化等级计算，无需重复保存。 */
     val subAttributeSlotCount: Int
         get() = this.level / 5
+
+    /** 一至五星的强化上限依次为 5、10、15、20、25 级。 */
+    val maxLevel: Int
+        get() = (this.rarity.toInt() + 1) * 5
 }
 
 private val nkKey = NamespacedKey(Echoes.NAMESPACE, "key")
@@ -109,7 +112,7 @@ val PersistentDataContainerView.echoData: EchoData?
             ?: return null
         val level = this[nkLevel, PersistentDataType.INTEGER]
             ?: return null
-        val exp = this[nkLevel, PersistentDataType.INTEGER]
+        val exp = this[nkExp, PersistentDataType.INTEGER]
             ?: return null
         val attr = this[nkAttributes, attrType]
             ?: return null

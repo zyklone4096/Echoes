@@ -2,7 +2,6 @@ package dev.zyklone.echoes
 
 import com.typesafe.config.ConfigFactory
 import dev.zyklone.echoes.commands.AdminCommand
-import dev.zyklone.echoes.commands.CommandManager
 import dev.zyklone.echoes.commands.MainCommand
 import dev.zyklone.echoes.config.Configurations
 import dev.zyklone.echoes.contents.attributes.EchoAttributes
@@ -12,7 +11,7 @@ import dev.zyklone.echoes.contents.sonata.SonataRegistry
 import dev.zyklone.echoes.database.DatabaseManager
 import dev.zyklone.echoes.listeners.CombatListener
 import dev.zyklone.echoes.listeners.PlayerListener
-import io.papermc.paper.command.brigadier.CommandSourceStack
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -20,11 +19,11 @@ import kotlinx.serialization.hocon.Hocon
 import kotlinx.serialization.hocon.decodeFromConfig
 import kotlinx.serialization.hocon.encodeToConfig
 import org.bukkit.Bukkit
+import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 import org.incendo.cloud.execution.ExecutionCoordinator
 import org.incendo.cloud.paper.PaperCommandManager
 import org.incendo.cloud.paper.util.sender.PaperSimpleSenderMapper
-import org.incendo.cloud.paper.util.sender.Source
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlin.io.path.createDirectories
@@ -43,6 +42,9 @@ class Echoes : JavaPlugin() {
         } }
 
         const val NAMESPACE = "echoes"
+
+        fun Player.runOnScheduler(retired: Runnable? = null, task: (ScheduledTask) -> Unit) =
+            this.scheduler.run(INST, task, retired)
     }
 
     init {

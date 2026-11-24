@@ -3,7 +3,6 @@ package dev.zyklone.echoes.gui
 import dev.zyklone.echoes.Echoes
 import dev.zyklone.echoes.commands.MESSAGE_HEADER
 import dev.zyklone.echoes.commands.append
-import dev.zyklone.echoes.contents.attributes.EchoAttributes
 import dev.zyklone.echoes.contents.echoes.EchoData
 import dev.zyklone.echoes.contents.echoes.EchoRegistry
 import dev.zyklone.echoes.contents.echoes.PlayerEchoData
@@ -13,7 +12,6 @@ import dev.zyklone.echoes.contents.player.PlayerDataAccess
 import dev.zyklone.echoes.contents.player.PlayerManager
 import dev.zyklone.echoes.contents.sonata.SonataRegistry
 import dev.zyklone.echoes.utils.literal
-import dev.zyklone.echoes.utils.styleless
 import io.papermc.paper.dialog.Dialog
 import io.papermc.paper.registry.data.dialog.ActionButton
 import io.papermc.paper.registry.data.dialog.DialogBase
@@ -32,7 +30,7 @@ object GuiEquip {
 
     private val exit = ActionButton.builder("取消".literal())
         .build()
-    private val empty = "空".literal(NamedTextColor.GRAY)
+    val empty = "空".literal(NamedTextColor.GRAY)
     private val badOld = "由于先前装备的声骸存在问题，无法生成物品".literal()
     private val noEmptySlot = "背包没有剩余空间，无法完成替换".literal()
     private val changedItem = "手持物品已改变，请重新打开装备界面".literal()
@@ -127,16 +125,7 @@ object GuiEquip {
                 button.tooltip(Component.text {
                     for (pair in data.attributes) {
                         it.appendNewline()
-                        if (pair == null) {
-                            it.append(EchoItems.emptyAttribute)
-                        } else {
-                            val (key, value) = pair
-                            it.append(Component.text()
-                                .styleless()
-                                .append(EchoItems.tick)
-                                .append(requireNotNull(EchoAttributes[key]) { "Unknown attribute $key" }.renderWide(value))
-                                .build())
-                        }
+                            .append(EchoItems.formatAttribute(pair))
                     }
                 })
             }

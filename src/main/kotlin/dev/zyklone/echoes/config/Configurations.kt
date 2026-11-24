@@ -42,13 +42,31 @@ internal data class BuiltinAttributes(
 @Serializable
 internal data class Items(
     val defaultEchoItem: Item = Item.Vanilla(Material.IRON_GOLEM_SPAWN_EGG),
+
+    // Sealed tubes
+    val basicSealedTube: Item = Item.BuiltinDefault,
+    val mediumSealedTube: Item = Item.BuiltinDefault,
+    val advancedSealedTube: Item = Item.BuiltinDefault,
+    val premiumSealedTube: Item = Item.BuiltinDefault,
+
+    // Tuners
+    val basicTuner: Item = Item.BuiltinDefault,
+    val mediumTuner: Item = Item.BuiltinDefault,
+    val advancedTuner: Item = Item.BuiltinDefault,
+    val premiumTuner: Item = Item.BuiltinDefault,
+
+    // Modifiers
+    val modifier: Item = Item.BuiltinDefault,
+    val transducer: Item = Item.BuiltinDefault,
 )
 
 @Serializable
 internal data class GamePlay(
     val dataBankLevelIncrement: Int = 100,
+    val echoLevelIncrement: Int = 500,
 ) {
     init {
         require(dataBankLevelIncrement > 0) { "Data bank level experience increment must be positive" }
+        require(echoLevelIncrement> 0) { "Echo level experience increment must be positive" }
     }
 }

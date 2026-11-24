@@ -4,6 +4,9 @@ import dev.zyklone.echoes.Echoes
 import dev.zyklone.echoes.contents.attributes.EchoAttributes
 import dev.zyklone.echoes.contents.echoes.Echo
 import dev.zyklone.echoes.contents.echoes.EchoRegistry
+import dev.zyklone.echoes.contents.items.EchoItems
+import dev.zyklone.echoes.contents.items.SealedTubeType
+import dev.zyklone.echoes.contents.items.TunerType
 import dev.zyklone.echoes.contents.player.PlayerManager
 import dev.zyklone.echoes.contents.sonata.Sonata
 import dev.zyklone.echoes.contents.sonata.SonataRegistry
@@ -15,6 +18,9 @@ import kotlinx.coroutines.future.await
 import kotlinx.coroutines.launch
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
+import org.incendo.cloud.Command
 import org.incendo.cloud.bukkit.data.SinglePlayerSelector
 import org.incendo.cloud.bukkit.parser.selector.SinglePlayerSelectorParser
 import org.incendo.cloud.paper.util.sender.PlayerSource
@@ -49,8 +55,16 @@ object AdminCommand {
             })
         }
 
-    private fun give(mgr: CommandManager, root: CommandBuilder) = root.literal("give")
-        .senderType(PlayerSource::class.java)
+    private fun give(mgr: CommandManager, root: CommandBuilder): Command.Builder<Source> {
+        val give = root.literal("give")
+        val pcb = give.senderType(PlayerSource::class.java)
+        mgr.command(giveEcho(mgr, pcb))
+        mgr.command(giveSealedTube(mgr, pcb))
+        mgr.command(giveTuner(mgr, pcb))
+        return give
+    }
+
+    private fun giveEcho(mgr: CommandManager, root: PlayerCommandBuilder) = root.literal("echo")
         .argument(mgr.componentBuilder(Echo::class.java, "echo")
             .parser(EchoRegistry.argumentParser())
             .suggestionProvider(EchoRegistry.suggestionProvider()))
@@ -67,20 +81,69 @@ object AdminCommand {
 
             val data = echo.createRandom(player, sonata = sonata, rarity = rarity)
             val created = echo.asItem(data)
-            player.scheduler.run(Echoes.INST, {
-                if (player.inventory.firstEmpty() < 0)
-                    return@run player.sendMessage(Component.text()
-                        .append(MESSAGE_HEADER)
-                        .append("物品栏中没有空槽".literal())
-                        .build())
 
-                player.inventory.addItem(created)
+            give0(player, created) {
                 player.sendMessage(Component.text()
                     .append(MESSAGE_HEADER)
                     .append("已添加 ".literal())
                     .append(echo.displayName(data.rarity)))
-            }, null)
+            }
         }
+
+    private fun giveSealedTube(mgr: CommandManager, root: PlayerCommandBuilder) = root.literal("sealed-tube")
+        .argument(EnumArgumentParser.component("type", SealedTubeType::class.java))
+        .optional(mgr.componentBuilder(Int::class.java, "amount"))
+        .optional(SinglePlayerSelectorParser.singlePlayerSelectorComponent<PlayerSource>()
+            .name("player"))
+        .handler {
+            val type: SealedTubeType = it["type"]
+            val amount = it.optional<Int>("amount")
+            val player = it.optional<Player>("player").orElseGet { it.sender().source() }
+
+            val created = EchoItems.newSealedTube(type)
+            created.amount = amount.orElse(1)!!
+
+            give0(player, created) {
+                player.sendMessage(Component.text()
+                    .append(MESSAGE_HEADER)
+                    .append("已添加 ".literal())
+                    .append(created.displayName()))
+            }
+        }
+
+    private fun giveTuner(mgr: CommandManager, root: PlayerCommandBuilder) = root.literal("tuner")
+        .argument(EnumArgumentParser.component("type", TunerType::class.java))
+        .optional(mgr.componentBuilder(Int::class.java, "amount"))
+        .optional(SinglePlayerSelectorParser.singlePlayerSelectorComponent<PlayerSource>()
+            .name("player"))
+        .handler {
+            val type: TunerType = it["type"]
+            val amount = it.optional<Int>("amount")
+            val player = it.optional<Player>("player").orElseGet { it.sender().source() }
+
+            val created = EchoItems.newTuner(type)
+            created.amount = amount.orElse(1)!!
+
+            give0(player, created) {
+                player.sendMessage(Component.text()
+                    .append(MESSAGE_HEADER)
+                    .append("已添加 ".literal())
+                    .append(created.displayName()))
+            }
+        }
+
+    private fun give0(player: Player, item: ItemStack, then: (() -> Unit)?) {
+        player.scheduler.run(Echoes.INST, {
+            if (player.inventory.firstEmpty() < 0)
+                return@run player.sendMessage(Component.text()
+                    .append(MESSAGE_HEADER)
+                    .append("物品栏中没有空槽".literal())
+                    .build())
+
+            player.inventory.addItem(item)
+            then?.invoke()
+        }, null)
+    }
 
     private fun dataBank(mgr: CommandManager, root: CommandBuilder) {
         val parent = root.literal("databank")

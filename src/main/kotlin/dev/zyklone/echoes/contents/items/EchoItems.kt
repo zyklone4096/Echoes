@@ -1,6 +1,7 @@
 package dev.zyklone.echoes.contents.items
 
 import dev.zyklone.echoes.Echoes
+import dev.zyklone.echoes.config.Item
 import dev.zyklone.echoes.config.Items
 import dev.zyklone.echoes.contents.attributes.EchoAttributes
 import dev.zyklone.echoes.contents.echoes.Echo
@@ -8,8 +9,11 @@ import dev.zyklone.echoes.contents.echoes.EchoData
 import dev.zyklone.echoes.contents.echoes.echoData
 import dev.zyklone.echoes.contents.sonata.SonataRegistry
 import dev.zyklone.echoes.utils.styleless
+import io.papermc.paper.persistence.PersistentDataKey
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 
 object EchoItems {
@@ -56,20 +60,79 @@ object EchoItems {
             .build())
         lore.add(Component.empty())
         for (pair in data.attributes) {
-            if (pair == null) {
-                lore.add(emptyAttribute)
-            } else {
-                val (key, value) = pair
-                lore.add(Component.text()
-                    .styleless()
-                    .append(tick)
-                    .append(requireNotNull(EchoAttributes[key]) { "Unknown attribute $key" }.renderWide(value))
-                    .build())
-            }
+            lore.add(formatAttribute(pair))
         }
         meta.lore(lore)
 
         it.itemMeta = meta
         return it
+    }
+
+    fun formatAttribute(data: Pair<NamespacedKey, Any>?) =
+        if (data == null) {
+            emptyAttribute
+        } else {
+            val (key, value) = data
+            Component.text()
+                .styleless()
+                .append(tick)
+                .append(requireNotNull(EchoAttributes[key]) { "Unknown attribute $key" }.renderWide(value))
+                .build()
+        }
+
+    private val nkSealedTube = PersistentDataKey.of(
+        NamespacedKey(Echoes.NAMESPACE, "sealed_tube"),
+        SealedTubePDT,
+    )
+    fun getSealedTubeType(item: ItemStack) =
+        item.persistentDataContainer[nkSealedTube]
+    fun newSealedTube(type: SealedTubeType): ItemStack {
+        val provider = type.provider()
+        val item = if (provider is Item.BuiltinDefault)
+            ItemStack(
+                when (type) {
+                    SealedTubeType.BASIC -> Material.EMERALD
+                    SealedTubeType.MEDIUM -> Material.LAPIS_LAZULI
+                    SealedTubeType.ADVANCED -> Material.HONEY_BOTTLE
+                    SealedTubeType.PREMIUM -> Material.GOLD_INGOT
+                }
+            ).apply {
+                editMeta {
+                    it.displayName(type.displayName)
+                    @Suppress("UsePropertyAccessSyntax")
+                    it.setRarity(type.rarity)
+                }
+            }
+        else provider.toItemStack()
+        item.editPersistentDataContainer { it[nkSealedTube] = type }
+        return item
+    }
+
+    private val nkTuner = PersistentDataKey.of(
+        NamespacedKey(Echoes.NAMESPACE, "tuner"),
+        TunerPDT
+    )
+    fun getTunerType(item: ItemStack) =
+        item.persistentDataContainer[nkTuner]
+    fun newTuner(type: TunerType): ItemStack {
+        val provider = type.provider()
+        val item = if (provider is Item.BuiltinDefault)
+            ItemStack(
+                when (type) {
+                    TunerType.BASIC -> Material.EMERALD
+                    TunerType.MEDIUM -> Material.LAPIS_LAZULI
+                    TunerType.ADVANCED -> Material.HONEY_BOTTLE
+                    TunerType.PREMIUM -> Material.GOLD_INGOT
+                }
+            ).apply {
+                editMeta {
+                    it.displayName(type.displayName)
+                    @Suppress("UsePropertyAccessSyntax")
+                    it.setRarity(type.rarity)
+                }
+            }
+        else provider.toItemStack()
+        item.editPersistentDataContainer { it[nkTuner] = type }
+        return item
     }
 }

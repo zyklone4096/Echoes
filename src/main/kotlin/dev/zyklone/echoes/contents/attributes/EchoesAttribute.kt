@@ -26,7 +26,23 @@ sealed interface EchoesAttribute<T> {
 
     fun random(player: Player, echo: Echo): T
 
-    abstract class DoubleAttribute: EchoesAttribute<Double> {
+    @Suppress("UNCHECKED_CAST")
+    fun nextWide(value: Any, maxLevel: Int): Any =
+        this.next(value as T, maxLevel)!!
+
+    /** 返回提升一级后的主属性值，由属性实现决定确定性的成长规则。 */
+    fun next(value: T, maxLevel: Int): T = value
+
+    abstract class DoubleAttribute(
+        val minBaseValue: Double = 0.0,
+        val maxBaseValue: Double = minBaseValue,
+    ): EchoesAttribute<Double> {
+        init {
+            require(minBaseValue.isFinite() && maxBaseValue.isFinite() && minBaseValue <= maxBaseValue) {
+                "Invalid attribute base value range"
+            }
+        }
+
         override fun load(view: ReadAttributes, summary: AttributeSummary) {
             view[this, PersistentDataType.DOUBLE]?.let { summary.add(this.key, it) }
         }
@@ -38,7 +54,17 @@ sealed interface EchoesAttribute<T> {
             pdc[this.key, PersistentDataType.DOUBLE] = value as Double
         }
 
-        override fun random(player: Player, echo: Echo): Double = 0.0
+        override fun random(player: Player, echo: Echo): Double =
+            if (this.minBaseValue == this.maxBaseValue) this.minBaseValue
+            else ThreadLocalRandom.current().nextDouble(this.minBaseValue, this.maxBaseValue)
+
+        override fun next(value: Double, maxLevel: Int): Double {
+            require(maxLevel > 0) { "Echo maximum level must be positive" }
+            // 未提供成长区间的属性保留原值，兼容已有自定义属性。
+            if (this.minBaseValue == this.maxBaseValue) return value
+            val increment = (this.maxBaseValue - this.minBaseValue) / maxLevel
+            return (value + increment).coerceIn(this.minBaseValue, this.maxBaseValue)
+        }
     }
 
     interface AutoRender<T>: EchoesAttribute<T> {

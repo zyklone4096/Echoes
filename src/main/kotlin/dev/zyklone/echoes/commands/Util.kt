@@ -11,11 +11,13 @@ import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.NamespacedKey
 import org.incendo.cloud.Command
 import org.incendo.cloud.paper.PaperCommandManager
+import org.incendo.cloud.paper.util.sender.PlayerSource
 import org.incendo.cloud.paper.util.sender.Source
 import org.incendo.cloud.suggestion.SuggestionProvider
 
 internal typealias CommandManager = PaperCommandManager<Source>
 internal typealias CommandBuilder = Command.Builder<Source>
+internal typealias PlayerCommandBuilder = Command.Builder<PlayerSource>
 
 val MESSAGE_HEADER = Component.text()
     .append("Echoes".literal().decorate(TextDecoration.BOLD))

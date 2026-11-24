@@ -1,20 +1,17 @@
 package dev.zyklone.echoes.contents.attributes
 
 import dev.zyklone.echoes.Echoes
-import dev.zyklone.echoes.contents.echoes.Echo
 import dev.zyklone.echoes.utils.formatPercent
 import dev.zyklone.echoes.utils.getOrRegisterAttribute
 import dev.zyklone.echoes.utils.scaleToString
 import dev.zyklone.echoes.utils.styleless
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.TextComponent
 import org.bukkit.NamespacedKey
 import org.bukkit.attribute.Attribute
 import org.bukkit.attribute.AttributeModifier
 import org.bukkit.entity.Player
-import java.util.concurrent.ThreadLocalRandom
 
-class HealthAttribute: EchoesAttribute.DoubleAttribute(), EchoesAttribute.AppliedAttribute, EchoesAttribute.AutoRender<Double> {
+class HealthAttribute: EchoesAttribute.DoubleAttribute(0.064, 0.116), EchoesAttribute.AppliedAttribute, EchoesAttribute.AutoRender<Double> {
     override val key: NamespacedKey =
         NamespacedKey(Echoes.NAMESPACE, "health")
 
@@ -34,12 +31,9 @@ class HealthAttribute: EchoesAttribute.DoubleAttribute(), EchoesAttribute.Applie
 
     override fun format(value: Double): String =
         value.formatPercent()
-
-    override fun random(player: Player, echo: Echo): Double =
-        ThreadLocalRandom.current().nextDouble(0.064, 0.116)
 }
 
-class HealthValueAttribute: EchoesAttribute.DoubleAttribute(), EchoesAttribute.AppliedAttribute, EchoesAttribute.AutoRender<Double> {
+class HealthValueAttribute: EchoesAttribute.DoubleAttribute(3.2, 5.8), EchoesAttribute.AppliedAttribute, EchoesAttribute.AutoRender<Double> {
     override val key: NamespacedKey = NamespacedKey(Echoes.NAMESPACE, "health_value")
 
     override fun apply(
@@ -64,7 +58,4 @@ class HealthValueAttribute: EchoesAttribute.DoubleAttribute(), EchoesAttribute.A
 
     override fun format(value: Double): String =
         value.scaleToString()
-
-    override fun random(player: Player, echo: Echo): Double =
-        ThreadLocalRandom.current().nextDouble(3.2, 5.8)
 }
