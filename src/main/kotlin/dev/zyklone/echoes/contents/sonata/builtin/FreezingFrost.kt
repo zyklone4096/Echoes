@@ -15,5 +15,5 @@ class FreezingFrost: Sonata {
         Component.text(rawName, NamedTextColor.AQUA)
 
     override fun check(data: List<EchoData?>): Boolean =
-        data.count { it?.sonataEffect == this.key } >= 2
+        data.filter { it?.sonataEffect == this.key }.distinctBy { it?.key }.size >= 2
 }

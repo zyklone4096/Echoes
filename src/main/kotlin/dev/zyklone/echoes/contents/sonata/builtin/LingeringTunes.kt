@@ -15,5 +15,5 @@ class LingeringTunes: Sonata {
         Component.text(rawName, NamedTextColor.RED)
 
     override fun check(data: List<EchoData?>): Boolean =
-        data.count { it?.sonataEffect == key } >= 2
+        data.filter { it?.sonataEffect == key }.distinctBy { it?.key }.size >= 2
 }

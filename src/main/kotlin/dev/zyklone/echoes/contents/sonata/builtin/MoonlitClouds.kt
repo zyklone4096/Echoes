@@ -15,5 +15,5 @@ class MoonlitClouds: Sonata {
         Component.text(rawName, NamedTextColor.GRAY)
 
     override fun check(data: List<EchoData?>): Boolean =
-        data.count { it?.sonataEffect == this.key } >= 2
+        data.filter { it?.sonataEffect == this.key }.distinctBy { it?.key }.size >= 2
 }

@@ -14,5 +14,5 @@ class HavocEclipse: Sonata {
     override fun displayName(): Component = Component.text(this.rawName, NamedTextColor.LIGHT_PURPLE)
 
     override fun check(data: List<EchoData?>): Boolean =
-        data.count { it?.key == this.key } >= 2
+        data.filter { it?.sonataEffect == this.key }.distinctBy { it?.key }.size >= 2
 }
