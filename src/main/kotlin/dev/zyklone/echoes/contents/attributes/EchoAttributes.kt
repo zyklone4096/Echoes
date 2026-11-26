@@ -1,15 +1,22 @@
 package dev.zyklone.echoes.contents.attributes
 
+import com.typesafe.config.ConfigFactory
 import dev.zyklone.echoes.Echoes
 import dev.zyklone.echoes.config.Configurations
+import dev.zyklone.echoes.config.CustomAttribute
 import dev.zyklone.echoes.contents.echoes.Echo
 import dev.zyklone.echoes.contents.echoes.EchoData
 import dev.zyklone.echoes.contents.echoes.PlayerEchoData
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.hocon.decodeFromConfig
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import java.nio.file.Path
 import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
+import kotlin.io.path.createDirectories
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.reader
 import kotlin.random.asKotlinRandom
 
 object EchoAttributes {
@@ -24,6 +31,27 @@ object EchoAttributes {
         if (cfg.defense) this.add0(DefenseAttribute())
         if (cfg.defenseValue) this.add0(DefenseValueAttribute())
         if (cfg.healing) this.add0(HealingAttribute())
+
+        // custom attributes
+        if (config.useCustomAttributes) {
+            val log = Echoes.INST.slF4JLogger
+            log.info("Loading custom attributes")
+            val attrDir = dp.resolve("attributes")
+            attrDir.createDirectories()
+            @OptIn(ExperimentalSerializationApi::class)
+            for (path in attrDir.listDirectoryEntries("**/*.{hocon,conf}")) {
+                try {
+                    val config =
+                        Echoes.HOCON.decodeFromConfig<CustomAttribute>(path.reader().use(ConfigFactory::parseReader))
+                    when (config) {
+                        is CustomAttribute.Double ->
+                            this.add(ConfiguredDoubleAttribute(config))
+                    }
+                } catch (e: Exception) {
+                    log.error("Error loading custom attribute from $path", e)
+                }
+            }
+        }
     }
 
     private fun add0(attr: EchoesAttribute<*>) {

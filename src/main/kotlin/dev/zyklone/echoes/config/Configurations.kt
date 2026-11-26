@@ -11,6 +11,9 @@ internal data class Configurations(
     val builtinAttributes: BuiltinAttributes = BuiltinAttributes(),
     val items: Items = Items(),
     val gameplay: GamePlay = GamePlay(),
+
+    // custom
+    val useCustomAttributes: Boolean = false,
 )
 
 @Serializable
