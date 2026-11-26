@@ -1,5 +1,8 @@
 package dev.zyklone.echoes.contents.echoes
 
+import dev.zyklone.echoes.contents.echoes.builtin.Armadillo
+import dev.zyklone.echoes.contents.echoes.builtin.Axolotl
+import dev.zyklone.echoes.contents.echoes.builtin.Chicken
 import dev.zyklone.echoes.contents.echoes.builtin.EnderDragon
 import dev.zyklone.echoes.contents.echoes.builtin.Enderman
 import dev.zyklone.echoes.contents.echoes.builtin.IronGolem
@@ -20,6 +23,9 @@ object EchoRegistry {
     private val registry = HashMap<NamespacedKey, Echo>()
 
     fun init() {
+        this.add(Armadillo())
+        this.add(Axolotl())
+        this.add(Chicken())
         this.add(EnderDragon())
         this.add(Enderman())
         this.add(IronGolem())

@@ -11,6 +11,7 @@ import dev.zyklone.echoes.contents.sonata.SonataRegistry
 import dev.zyklone.echoes.database.DatabaseManager
 import dev.zyklone.echoes.listeners.CombatListener
 import dev.zyklone.echoes.listeners.PlayerListener
+import dev.zyklone.echoes.listeners.SkillListener
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
@@ -108,6 +109,7 @@ class Echoes : JavaPlugin() {
         val pm = Bukkit.getPluginManager()
         pm.registerEvents(PlayerListener(), this)
         pm.registerEvents(CombatListener(), this)
+        pm.registerEvents(SkillListener, this)
 
         val cm = PaperCommandManager
             .builder(PaperSimpleSenderMapper.simpleSenderMapper())
