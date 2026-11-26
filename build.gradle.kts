@@ -12,6 +12,22 @@ plugins {
 repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
+
+    maven("https://r.irepo.space/maven/") {
+        mavenContent {
+            includeGroup("pers.neige.neigeitems")
+        }
+    }
+    maven("https://repo.oraxen.com/releases") {
+        mavenContent {
+            includeGroup("io.th0rgal")
+        }
+    }
+    maven("https://repo.momirealms.net/releases/") {
+        mavenContent {
+            includeGroup("net.momirealms")
+        }
+    }
 }
 
 val include = configurations.create("include")
@@ -31,6 +47,13 @@ dependencies {
 
     include(libs.cloud.paper)
     include(libs.cloud.kotlin.coroutines)
+
+    // https://github.com/ankhorg/NeigeItems-Kotlin
+    compileOnly("pers.neige.neigeitems:NeigeItems:1.22.2") { isTransitive = false }
+    // https://docs.oraxen.com/developers/api
+    compileOnly("io.th0rgal:oraxen:1.221.0") { isTransitive = false }
+    // https://github.com/Xiao-MoMi/craft-engine
+    compileOnly("net.momirealms:craft-engine-core:26.9") { isTransitive = false }
 
     testImplementation(kotlin("test"))
     testImplementation(libs.paper.api)

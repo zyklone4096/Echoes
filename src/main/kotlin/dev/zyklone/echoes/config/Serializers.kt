@@ -1,6 +1,7 @@
 @file:UseSerializers(
     NamespacedKeySerializer::class,
-    AttributeSerializer::class
+    AttributeSerializer::class,
+    CEKeySerializer::class,
 )
 
 package dev.zyklone.echoes.config
@@ -11,6 +12,7 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import net.momirealms.craftengine.core.util.Key
 import org.bukkit.NamespacedKey
 import org.bukkit.Registry
 import org.bukkit.attribute.Attribute
@@ -39,4 +41,16 @@ object AttributeSerializer: KSerializer<Attribute> {
             "Unknown attribute $key"
         }
     }
+}
+
+object CEKeySerializer: KSerializer<Key> {
+    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("net.momirealms.craftengine.core.util.Key")
+
+    override fun serialize(
+        encoder: Encoder,
+        value: Key
+    ) = encoder.encodeString(value.asString())
+
+    override fun deserialize(decoder: Decoder): Key =
+        Key.of(decoder.decodeString())
 }

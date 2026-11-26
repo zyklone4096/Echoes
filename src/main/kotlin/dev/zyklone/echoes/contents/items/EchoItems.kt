@@ -14,17 +14,18 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
 object EchoItems {
     private var config: Items = Items()
-    private var defaultEchoItem: ItemStack = config.defaultEchoItem.toItemStack()
+    private var defaultEchoItem: ItemStack = config.defaultEchoItem.toItemStack(null)
 
     val tick = " - ".styleless()
 
     fun init() {
         this.config = Echoes.INST.config.items
-        this.defaultEchoItem = this.config.defaultEchoItem.toItemStack()
+        this.defaultEchoItem = this.config.defaultEchoItem.toItemStack(null)
     }
 
     val emptyAttribute = Component.text()
@@ -86,7 +87,7 @@ object EchoItems {
     )
     fun getSealedTubeType(item: ItemStack) =
         item.persistentDataContainer[nkSealedTube]
-    fun newSealedTube(type: SealedTubeType): ItemStack {
+    fun newSealedTube(type: SealedTubeType, player: Player?): ItemStack {
         val provider = type.provider()
         val item = if (provider is Item.BuiltinDefault)
             ItemStack(
@@ -103,8 +104,15 @@ object EchoItems {
                     it.setRarity(type.rarity)
                 }
             }
-        else provider.toItemStack()
-        item.editPersistentDataContainer { it[nkSealedTube] = type }
+        else provider.toItemStack(player)
+        if (provider.modifyDisplay)
+            item.editMeta {
+                it.displayName(type.displayName)
+                @Suppress("UsePropertyAccessSyntax")
+                it.setRarity(type.rarity)
+            }
+        if (provider.modifyIdentifier)
+            item.editPersistentDataContainer { it[nkSealedTube] = type }
         return item
     }
 
@@ -114,7 +122,7 @@ object EchoItems {
     )
     fun getTunerType(item: ItemStack) =
         item.persistentDataContainer[nkTuner]
-    fun newTuner(type: TunerType): ItemStack {
+    fun newTuner(type: TunerType, player: Player? = null): ItemStack {
         val provider = type.provider()
         val item = if (provider is Item.BuiltinDefault)
             ItemStack(
@@ -124,15 +132,16 @@ object EchoItems {
                     TunerType.ADVANCED -> Material.HONEY_BOTTLE
                     TunerType.PREMIUM -> Material.GOLD_INGOT
                 }
-            ).apply {
-                editMeta {
-                    it.displayName(type.displayName)
-                    @Suppress("UsePropertyAccessSyntax")
-                    it.setRarity(type.rarity)
-                }
+            )
+        else provider.toItemStack(player)
+        if (provider.modifyDisplay)
+            item.editMeta {
+                it.displayName(type.displayName)
+                @Suppress("UsePropertyAccessSyntax")
+                it.setRarity(type.rarity)
             }
-        else provider.toItemStack()
-        item.editPersistentDataContainer { it[nkTuner] = type }
+        if (provider.modifyIdentifier)
+            item.editPersistentDataContainer { it[nkTuner] = type }
         return item
     }
 }
